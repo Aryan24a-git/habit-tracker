@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, RefreshCw, Trash2, AlertTriangle, User } from 'lucide-react';
+import { X, RefreshCw, Trash2, AlertTriangle, User, Instagram, Github, Linkedin } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import { InstallPWA } from './InstallPWA';
 
@@ -43,9 +43,40 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                             <User className="w-5 h-5" />
                             About Developer
                         </h3>
-                        <p className="text-sm text-gray-300 leading-relaxed italic">
+                        <p className="text-sm text-gray-300 leading-relaxed italic mb-4">
                             "Hi, I’m Aryan — a B.Tech CSE student focused on backend engineering, DevOps, and AI systems. I love building real-world projects, experimenting with automation, and creating intelligent tools that solve practical problems. Always learning, always improving."
                         </p>
+
+                        {/* Social Links */}
+                        <div className="flex items-center gap-4 pt-2 border-t border-white/5">
+                            <a
+                                href="https://instagram.com/aryansk282"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 bg-white/5 rounded-lg hover:bg-gold-500/10 hover:text-gold-400 transition-all duration-200 group"
+                                title="Instagram"
+                            >
+                                <Instagram className="w-5 h-5" />
+                            </a>
+                            <a
+                                href="https://github.com/Aryan24a-git"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 bg-white/5 rounded-lg hover:bg-gold-500/10 hover:text-gold-400 transition-all duration-200 group"
+                                title="GitHub"
+                            >
+                                <Github className="w-5 h-5" />
+                            </a>
+                            <a
+                                href="https://linkedin.com/in/aryan-sk"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 bg-white/5 rounded-lg hover:bg-gold-500/10 hover:text-gold-400 transition-all duration-200 group"
+                                title="LinkedIn"
+                            >
+                                <Linkedin className="w-5 h-5" />
+                            </a>
+                        </div>
                     </div>
 
                     {/* Danger Zone */}
