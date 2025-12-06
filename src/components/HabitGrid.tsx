@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { format, isSameDay, startOfWeek, addDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 import { useHabits } from '../context/HabitContext';
 import clsx from 'clsx';
-import { Check, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Calendar, GripVertical } from 'lucide-react';
 
 interface HabitGridProps {
     onEditHabit?: (id: string) => void;
@@ -15,6 +15,11 @@ export const HabitGrid: React.FC<HabitGridProps> = ({ onEditHabit }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('week');
     const [currentDate, setCurrentDate] = useState(new Date());
 
+    // Resizable column state
+    const [sidebarWidth, setSidebarWidth] = useState(250);
+    const [isResizing, setIsResizing] = useState(false);
+    const sidebarRef = useRef<HTMLDivElement>(null);
+
     // Calculate days based on view mode
     const days = React.useMemo(() => {
         if (viewMode === 'week') {
@@ -26,6 +31,32 @@ export const HabitGrid: React.FC<HabitGridProps> = ({ onEditHabit }) => {
             return eachDayOfInterval({ start, end });
         }
     }, [viewMode, currentDate]);
+
+    // Resizing Logic
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizing) return;
+            // Limit width between 100px and 400px
+            const newWidth = Math.max(100, Math.min(400, e.clientX - (sidebarRef.current?.getBoundingClientRect().left || 0)));
+            setSidebarWidth(newWidth);
+        };
+
+        const handleMouseUp = () => {
+            setIsResizing(false);
+            document.body.style.cursor = 'default';
+        };
+
+        if (isResizing) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'col-resize';
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isResizing]);
 
     const isCompleted = (habitId: string, date: Date) => {
         const dateStr = format(date, 'yyyy-MM-dd');
@@ -44,56 +75,71 @@ export const HabitGrid: React.FC<HabitGridProps> = ({ onEditHabit }) => {
     const jumpToToday = () => setCurrentDate(new Date());
 
     // Format header date
-    const headerTitle = viewMode === 'week'
-        ? `Week of ${format(days[0], 'MMM d, yyyy')}`
-        : format(currentDate, 'MMMM yyyy');
+    const getHeaderTitle = () => {
+        if (viewMode === 'week') {
+            const start = days[0];
+            const end = days[days.length - 1];
+            // "Dec 1 - Dec 7, 2025" or "Dec 29, 2025 - Jan 4, 2026" logic
+            const startFormat = isSameDay(start, end) ? '' : format(start, 'MMM d');
+            const endFormat = format(end, 'MMM d, yyyy');
+            return `${startFormat} - ${endFormat}`;
+        }
+        return format(currentDate, 'MMMM yyyy');
+    };
 
     return (
-        <div className="bg-dark-800/30 rounded-2xl border border-white/5 overflow-hidden flex flex-col h-full">
+        <div className="bg-dark-800/30 rounded-2xl border border-white/5 overflow-hidden flex flex-col h-full select-none">
             {/* Header Controls */}
-            <div className="p-6 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <h3 className="text-xl font-bold text-white min-w-[200px]">{headerTitle}</h3>
-                    <div className="flex items-center gap-1 bg-dark-900/50 rounded-lg p-1 border border-white/5 relative">
-                        <button
-                            onClick={() => navigate('prev')}
-                            className="p-1 hover:text-white text-gray-400 transition-colors"
-                        >
-                            <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={jumpToToday}
-                            className="text-xs font-medium px-2 py-1 hover:text-white text-gray-400 transition-colors"
-                        >
-                            Today
-                        </button>
-                        <button
-                            onClick={() => navigate('next')}
-                            className="p-1 hover:text-white text-gray-400 transition-colors"
-                        >
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
-
-                        <div className="w-px h-4 bg-white/10 mx-1" />
-
-                        <div className="relative group">
-                            <input
-                                type="date"
-                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-                                onChange={(e) => {
-                                    if (e.target.valueAsDate) {
-                                        setCurrentDate(e.target.valueAsDate);
-                                    }
-                                }}
-                            />
-                            <button className="p-1 group-hover:text-white text-gray-400 transition-colors" title="Jump to Date">
-                                <Calendar className="w-4 h-4" />
+            <div className="p-6 pb-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-4">
+                        <h3 className="text-xl font-bold text-white min-w-[200px] whitespace-nowrap">
+                            {getHeaderTitle()}
+                        </h3>
+                        {/* Navigation */}
+                        <div className="flex items-center gap-1 bg-dark-900/50 rounded-lg p-1 border border-white/5 relative">
+                            <button
+                                onClick={() => navigate('prev')}
+                                className="p-1 hover:text-white text-gray-400 transition-colors"
+                            >
+                                <ChevronLeft className="w-5 h-5" />
                             </button>
+                            <button
+                                onClick={jumpToToday}
+                                className="text-xs font-medium px-2 py-1 hover:text-white text-gray-400 transition-colors"
+                            >
+                                Today
+                            </button>
+                            <button
+                                onClick={() => navigate('next')}
+                                className="p-1 hover:text-white text-gray-400 transition-colors"
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                            <div className="w-px h-4 bg-white/10 mx-1" />
+                            <div className="relative group">
+                                <input
+                                    type="date"
+                                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                                    onChange={(e) => {
+                                        if (e.target.valueAsDate) {
+                                            setCurrentDate(e.target.valueAsDate);
+                                        }
+                                    }}
+                                />
+                                <button className="p-1 group-hover:text-white text-gray-400 transition-colors" title="Jump to Date">
+                                    <Calendar className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
+                    </div>
+                    {/* Current Date Subtitle */}
+                    <div className="text-xs text-gold-500/80 font-medium">
+                        Current Date: {format(new Date(), 'EEEE, MMMM do, yyyy')}
                     </div>
                 </div>
 
-                <div className="flex bg-dark-900/50 p-1 rounded-xl border border-white/5 mx-auto md:mx-0">
+                <div className="flex bg-dark-900/50 p-1 rounded-xl border border-white/5 mx-auto xl:mx-0">
                     <button
                         onClick={() => setViewMode('week')}
                         className={clsx(
@@ -119,12 +165,27 @@ export const HabitGrid: React.FC<HabitGridProps> = ({ onEditHabit }) => {
                 </div>
             </div>
 
-            <div className="overflow-x-auto flex-1 scrollbar-thin scrollbar-thumb-dark-700 scrollbar-track-transparent">
+            <div className="overflow-x-auto flex-1 scrollbar-thin scrollbar-thumb-dark-700 scrollbar-track-transparent relative" ref={sidebarRef}>
                 <table className="w-full min-w-max border-collapse">
                     <thead>
                         <tr>
-                            <th className="sticky left-0 z-10 bg-dark-900/95 backdrop-blur-sm text-left py-4 px-6 text-gray-400 font-medium w-[250px] border-b border-white/5">
-                                Habit
+                            <th
+                                className="sticky left-0 z-20 bg-dark-900/95 backdrop-blur-sm text-left border-b border-white/5 group"
+                                style={{ width: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth }}
+                            >
+                                <div className="flex items-center justify-between h-full py-4 px-6 relative">
+                                    <span className="text-gray-400 font-medium">Habit</span>
+                                    {/* Resizer Handle */}
+                                    <div
+                                        className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-gold-500/50 active:bg-gold-500 transition-colors z-30 flex items-center justify-center"
+                                        onMouseDown={(e) => {
+                                            e.preventDefault();
+                                            setIsResizing(true);
+                                        }}
+                                    >
+                                        <GripVertical className="w-3 h-3 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                </div>
                             </th>
                             {days.map(date => (
                                 <th key={date.toString()} className="text-center py-4 px-1 min-w-[50px] border-b border-white/5">
@@ -142,14 +203,17 @@ export const HabitGrid: React.FC<HabitGridProps> = ({ onEditHabit }) => {
                     <tbody className="divide-y divide-white/5">
                         {habits.map(habit => (
                             <tr key={habit.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="sticky left-0 z-10 bg-dark-900/95 backdrop-blur-sm py-4 px-6 border-r border-white/5 group-hover:bg-dark-800/80 transition-colors">
+                                <td
+                                    className="sticky left-0 z-10 bg-dark-900/95 backdrop-blur-sm py-4 px-6 border-r border-white/5 group-hover:bg-dark-800/80 transition-colors"
+                                    style={{ width: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth }}
+                                >
                                     <div
-                                        className="cursor-pointer group-hover:text-gold-400 transition-colors flex items-center justify-between"
+                                        className="cursor-pointer group-hover:text-gold-400 transition-colors flex items-center justify-between overflow-hidden"
                                         onClick={() => onEditHabit?.(habit.id)}
                                     >
-                                        <div>
-                                            <div className="font-medium text-gray-200 truncate max-w-[180px]">{habit.name}</div>
-                                            <div className="text-xs text-gray-500">{habit.category}</div>
+                                        <div className="truncate">
+                                            <div className="font-medium text-gray-200 truncate" title={habit.name}>{habit.name}</div>
+                                            <div className="text-xs text-gray-500 truncate">{habit.category}</div>
                                         </div>
                                     </div>
                                 </td>
