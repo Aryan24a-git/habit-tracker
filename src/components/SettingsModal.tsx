@@ -50,7 +50,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                         {/* Social Links */}
                         <div className="flex items-center gap-4 pt-2 border-t border-white/5">
                             <a
-                                href="https://instagram.com/aryansk282"
+                                href="https://www.instagram.com/aryan_24a"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 bg-white/5 rounded-lg hover:bg-gold-500/10 hover:text-gold-400 transition-all duration-200 group"
