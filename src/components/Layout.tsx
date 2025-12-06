@@ -47,12 +47,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                     ))}
                 </nav>
 
-                <div className="px-6 pb-6 mt-auto">
-                    <p className="text-[11px] leading-relaxed text-gray-500/80 font-medium">
-                        "Hi, I’m Aryan — a B.Tech CSE student focused on backend engineering, DevOps, and AI systems. I love building real-world projects, experimenting with automation, and creating intelligent tools that solve practical problems. Always learning, always improving."
-                    </p>
-                </div>
-
                 <div className="p-4 border-t border-dark-800">
                     <button
                         onClick={() => setIsSettingsOpen(true)}
@@ -61,10 +55,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                         <Settings className="w-5 h-5" />
                         <span>Settings</span>
                     </button>
-
-                    <div className="mt-4 text-[10px] text-center text-gray-700 font-medium">
-                        © 2025 Aryan. All Rights Reserved.
-                    </div>
                 </div>
             </aside>
 

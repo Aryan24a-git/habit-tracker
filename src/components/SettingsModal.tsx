@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, RefreshCw, Trash2, AlertTriangle } from 'lucide-react';
+import { X, RefreshCw, Trash2, AlertTriangle, User } from 'lucide-react';
 import { useHabits } from '../context/HabitContext';
 import { InstallPWA } from './InstallPWA';
 
@@ -9,7 +9,7 @@ interface SettingsModalProps {
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
-    const { resetProgress, habits } = useHabits();
+    const { resetProgress } = useHabits();
 
     if (!isOpen) return null;
 
@@ -20,7 +20,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-dark-900 border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <div className="bg-dark-900 border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-dark-700">
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white"
@@ -36,6 +36,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 <div className="space-y-6">
                     {/* PWA Install Button */}
                     <InstallPWA />
+
+                    {/* Personal Bio */}
+                    <div className="p-4 rounded-xl bg-dark-800/50 border border-white/5">
+                        <h3 className="text-gold-400 font-bold flex items-center gap-2 mb-3">
+                            <User className="w-5 h-5" />
+                            About Developer
+                        </h3>
+                        <p className="text-sm text-gray-300 leading-relaxed italic">
+                            "Hi, I’m Aryan — a B.Tech CSE student focused on backend engineering, DevOps, and AI systems. I love building real-world projects, experimenting with automation, and creating intelligent tools that solve practical problems. Always learning, always improving."
+                        </p>
+                    </div>
 
                     {/* Danger Zone */}
                     <div className="bg-red-500/5 border border-red-500/10 p-4 rounded-xl">
@@ -55,8 +66,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                         </button>
                     </div>
 
-                    <div className="text-center text-gray-500 text-xs">
-                        Habit Tracker v1.0 • {habits.length} Active Habits
+                    {/* Copyright Footer */}
+                    <div className="text-center text-gray-500 text-xs border-t border-white/5 pt-4">
+                        © 2025 Aryan. All Rights Reserved ❤️.
                     </div>
                 </div>
             </div>
