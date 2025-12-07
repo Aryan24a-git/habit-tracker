@@ -4,7 +4,7 @@ import { Flame, CheckCircle2, TrendingUp, Plus } from 'lucide-react';
 import { HabitGrid } from './HabitGrid';
 import { HabitModal } from './HabitModal';
 import { format } from 'date-fns';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 export const Dashboard: React.FC = () => {
   const { habits, logs } = useHabits();
@@ -14,18 +14,37 @@ export const Dashboard: React.FC = () => {
   // Basic stats calculation
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const todayLogs = logs[todayStr] || {};
-  const completedToday = Object.values(todayLogs).filter(Boolean).length;
+
+  // Prepare Pie Data
   const totalHabits = habits.length;
-  const pendingHabits = Math.max(0, totalHabits - completedToday);
+  const completedHabits = habits.filter(h => todayLogs[h.id]);
+  const pendingCount = totalHabits - completedHabits.length;
 
-  const completionRate = totalHabits > 0 ? Math.round((completedToday / totalHabits) * 100) : 0;
-
-  const pieData = [
-    { name: 'Completed', value: completedToday },
-    { name: 'Pending', value: pendingHabits }
+  const COLORS = [
+    '#F472B6', // Pink
+    '#38BDF8', // Light Blue
+    '#34D399', // Emerald
+    '#A78BFA', // Violet
+    '#FBBF24', // Amber
+    '#FB7185', // Rose
+    '#22D3EE', // Cyan
   ];
 
-  const COLORS = ['#EAB308', '#374151']; // Gold-500, Dark-700/Gray
+  const pieData = [
+    ...completedHabits.map((h, index) => ({
+      name: h.name,
+      value: 1, // Equal weight
+      color: COLORS[index % COLORS.length]
+    })),
+    ...(pendingCount > 0 ? [{
+      name: 'Pending Tasks',
+      value: pendingCount,
+      color: '#374151' // Dark Gray
+    }] : [])
+  ];
+
+  const completedToday = completedHabits.length;
+  const completionRate = totalHabits > 0 ? Math.round((completedToday / totalHabits) * 100) : 0;
 
   const handleOpenNew = () => {
     setEditHabitId(null);
@@ -39,6 +58,19 @@ export const Dashboard: React.FC = () => {
 
   // Animation classes
   const cardClass = "bg-dark-800/50 p-6 rounded-2xl border border-white/5 backdrop-blur-sm transition-all duration-500 hover:border-gold-500/20 hover:shadow-[0_0_20px_-5px_rgba(234,179,8,0.1)]";
+
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index: _ }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-[10px] font-bold">
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
 
   return (
     <div className="space-y-8">
@@ -92,9 +124,9 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Pie Chart Card */}
-        <div className={`${cardClass} flex flex-col items-center justify-center min-h-[200px]`}>
-          <h3 className="text-lg font-bold text-white mb-2 self-start">Daily Productivity</h3>
-          <div className="w-full h-[150px]">
+        <div className={`${cardClass} flex flex-col items-center justify-center min-h-[300px]`}>
+          <h3 className="text-lg font-bold text-white mb-4 self-start">Daily Productivity Breakdown</h3>
+          <div className="w-full h-[200px]">
             {totalHabits > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -102,18 +134,27 @@ export const Dashboard: React.FC = () => {
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={40}
-                    outerRadius={60}
-                    paddingAngle={5}
+                    innerRadius={45}
+                    outerRadius={70}
+                    paddingAngle={3}
                     dataKey="value"
+                    labelLine={false}
+                    label={renderCustomizedLabel}
                   >
-                    {pieData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                     ))}
                   </Pie>
                   <Tooltip
                     contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '8px' }}
                     itemStyle={{ color: '#fff' }}
+                  />
+                  <Legend
+                    layout="horizontal"
+                    verticalAlign="bottom"
+                    align="center"
+                    iconSize={8}
+                    wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -122,16 +163,6 @@ export const Dashboard: React.FC = () => {
                 No habits to show
               </div>
             )}
-          </div>
-          <div className="flex gap-4 text-xs mt-2">
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-gold-500" />
-              <span className="text-gray-400">Completed</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-dark-700" />
-              <span className="text-gray-400">Pending</span>
-            </div>
           </div>
         </div>
       </div>
