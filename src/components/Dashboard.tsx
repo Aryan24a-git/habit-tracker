@@ -5,6 +5,8 @@ import { HabitGrid } from './HabitGrid';
 import { HabitModal } from './HabitModal';
 import { format } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PomodoroTimer } from './PomodoroTimer';
+import { TodoList } from './TodoList';
 
 export const Dashboard: React.FC = () => {
   const { habits, logs } = useHabits();
@@ -89,44 +91,45 @@ export const Dashboard: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up">
-        {/* Stats Column */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className={cardClass}>
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-red-500/10 rounded-lg text-red-500">
-                <Flame className="w-6 h-6" />
-              </div>
+      {/* Top Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
+        <div className={cardClass}>
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-red-500/10 rounded-lg text-red-500">
+              <Flame className="w-6 h-6" />
             </div>
-            <div className="text-3xl font-bold text-white mb-1">0</div>
-            <div className="text-sm text-gray-500">Current Day Streak</div>
           </div>
-
-          <div className={cardClass}>
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-green-500/10 rounded-lg text-green-500">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-white mb-1">{completedToday} / {totalHabits}</div>
-            <div className="text-sm text-gray-500">Habits Completed Today</div>
-          </div>
-
-          <div className={cardClass}>
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-blue-500/10 rounded-lg text-blue-500">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-white mb-1">{completionRate}%</div>
-            <div className="text-sm text-gray-500">Daily Completion Rate</div>
-          </div>
+          <div className="text-3xl font-bold text-white mb-1">0</div>
+          <div className="text-sm text-gray-500">Current Day Streak</div>
         </div>
 
-        {/* Pie Chart Card */}
-        <div className={`${cardClass} flex flex-col items-center justify-center min-h-[300px]`}>
-          <h3 className="text-lg font-bold text-white mb-4 self-start">Daily Productivity Breakdown</h3>
-          <div className="w-full h-[200px]">
+        <div className={cardClass}>
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-green-500/10 rounded-lg text-green-500">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-white mb-1">{completedToday} / {totalHabits}</div>
+          <div className="text-sm text-gray-500">Habits Completed Today</div>
+        </div>
+
+        <div className={cardClass}>
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-blue-500/10 rounded-lg text-blue-500">
+              <TrendingUp className="w-6 h-6" />
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-white mb-1">{completionRate}%</div>
+          <div className="text-sm text-gray-500">Daily Completion Rate</div>
+        </div>
+      </div>
+
+      {/* Widgets Row: Pie / Pomodoro / Todo */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up delay-75">
+        {/* Pie Chart */}
+        <div className={`${cardClass} flex flex-col items-center justify-center min-h-[350px]`}>
+          <h3 className="text-lg font-bold text-white mb-4 self-start">Productivity</h3>
+          <div className="w-full h-[250px]">
             {totalHabits > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -134,8 +137,8 @@ export const Dashboard: React.FC = () => {
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={45}
-                    outerRadius={70}
+                    innerRadius={50}
+                    outerRadius={80}
                     paddingAngle={3}
                     dataKey="value"
                     labelLine={false}
@@ -164,6 +167,16 @@ export const Dashboard: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Pomodoro Timer */}
+        <div className="h-full">
+          <PomodoroTimer />
+        </div>
+
+        {/* Todo List */}
+        <div className="h-full">
+          <TodoList />
         </div>
       </div>
 
