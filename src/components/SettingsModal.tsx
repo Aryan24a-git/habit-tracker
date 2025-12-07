@@ -68,7 +68,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                 <Github className="w-5 h-5" />
                             </a>
                             <a
-                                href="https://linkedin.com/in/aryan-sk"
+                                href="https://www.linkedin.com/in/sk-firdous-ali-789719393?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 bg-white/5 rounded-lg hover:bg-gold-500/10 hover:text-gold-400 transition-all duration-200 group"
